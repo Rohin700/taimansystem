@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.taimansystem.WorkersTableView.WorkersTableViewController">
+   <children>
+      <TableView fx:id="tblview" layoutX="68.0" layoutY="144.0" prefHeight="200.0" prefWidth="464.0" />
+      <ComboBox fx:id="combo" layoutX="68.0" layoutY="35.0" prefHeight="46.0" prefWidth="201.0" promptText="Specializations" />
+      <Button layoutX="331.0" layoutY="35.0" mnemonicParsing="false" onAction="#doShowAll" prefHeight="46.0" prefWidth="201.0" text="Show All Workers" />
+   </children>
+</AnchorPane>
