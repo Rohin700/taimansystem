@@ -1,7 +1,5 @@
-//CURRENT DATE kaise?
-//all order ids in combo
-//dates and order id clear nhi ho rhi new pr click rknei pr
-//Add Email here to send the information ki order received;
+//Mail sent that measurement of your order is taken;
+//Order id's combo
 package com.example.taimansystem.Measurements;
 
 import java.io.File;
@@ -79,13 +77,20 @@ public class MeasurementsController {
 
     @FXML
     void doSearch(ActionEvent event) {
+        String selectedId = orderid.getValue();  // Get the selected Order ID from the ComboBox
+
+        if (selectedId == null || selectedId.isEmpty()) {
+            System.out.println("No Order ID selected.");
+            return;  // Exit the method early if no valid ID is selected
+        }
+
         try {
             //Mobile_no ,dress ,pic ,Deliv_date,qty,bill,measurements,worker_assign ,doorder
             stmt = con.prepareStatement("select * from measurements where Orderid=?");
-            stmt.setString(1, orderid.getValue());
+            stmt.setString(1, selectedId);
             ResultSet records = stmt.executeQuery();
-            while(records.next())
-            {
+
+            if (records.next()) {
                 String mno=records.getString("Mobile_no");//column name
                 String drs=records.getString("dress");//column name
                 String pc=records.getString("pic");//column name
@@ -95,9 +100,10 @@ public class MeasurementsController {
                 Integer bl=records.getInt("Bill");//col name
                 String msmt=records.getString("measurements");//col name
                 String wrk=records.getString("worker_assign");//col name
+                Integer sts=records.getInt("status");//nealy added
 
 
-                System.out.println(mno+" "+drs+" "+pc+" "+dd+" "+qt+" "+pp+" "+bl+" "+msmt+" "+wrk);
+                System.out.println(mno+" "+drs+" "+pc+" "+dd+" "+qt+" "+pp+" "+bl+" "+msmt+" "+wrk+" "+sts);
 
                 mobileno.setText(mno);
                 cdresses.getEditor().setText(String.valueOf(drs));
@@ -105,12 +111,14 @@ public class MeasurementsController {
                     imgPrev.setImage(new Image(new FileInputStream(pc)));
                 }
                 qty.getEditor().setText(String.valueOf(qt));
-
                 ppu.setText(String.valueOf(pp));
                 bill.setText(String.valueOf(bl));
                 measurement.setText(msmt);
                 workers.getEditor().setText(wrk);
-
+                status.getEditor().setText(String.valueOf(sts));
+            }
+            else {
+                System.out.println("No records found for Order ID: " + selectedId);
             }
         }
         catch (Exception e){
@@ -146,16 +154,22 @@ public class MeasurementsController {
 
     void doclear(){
         //Mobile_no ,dress ,pic ,Deliv_date,qty,bill,measurements,worker_assign ,doorder
+        orderid.getSelectionModel().clearSelection();//newly added
         mobileno.setText("");
-        cdresses.setValue(null);
+        cdresses.getSelectionModel().clearSelection();
+        cdresses.getEditor().clear();
         imgPrev.setImage(null);
-        dodel.setPromptText("");
-        qty.setValue(null);
-        ppu.setText("");
-        bill.setText("");
-        measurement.setText("");
-        workers.setValue("");
-        status.setValue(null);
+        dodel.setValue(null);
+        doorder.setValue(LocalDate.now());
+        qty.getSelectionModel().clearSelection();
+        qty.getEditor().clear();
+        ppu.clear();
+        bill.clear();
+        measurement.clear();
+        workers.getSelectionModel().clearSelection();
+        workers.getEditor().clear();
+        status.getSelectionModel().clearSelection();
+        status.getEditor().clear();
     }
 
     @FXML
@@ -196,6 +210,10 @@ void DoSave(ActionEvent event) {
         String doorder=String.valueOf(java.time.LocalDate.now());
         String workstatus=status.getSelectionModel().getSelectedItem();
 
+        if (filepath == null || filepath.isEmpty()) {
+            filepath = "nopic.jpg"; // or prompt user
+        }//newly added if
+
         String query="INSERT INTO measurements(Mobile_no,dress,pic,Deliv_date,qty,Price_per_unit,bill,measurements,worker_assign,doorder,status) VALUES(?,?,?,?,?,?,?,?,?,?,?)";
         //,PreparedStatement.RETURN_GENERATED_KEYS\"); "
 
@@ -215,9 +233,15 @@ void DoSave(ActionEvent event) {
 
             ResultSet generatedKeys=pst.getGeneratedKeys();
             if(generatedKeys.next()){
-                int ORDERID=generatedKeys.getInt(1);
-                orderid.getItems().add(String.valueOf(ORDERID));
-                orderid.getSelectionModel().select(String.valueOf(ORDERID));
+                int ORDERID = generatedKeys.getInt(1);
+                String orderIdStr = String.valueOf(ORDERID);
+
+                // ✅ Prevent duplicates
+                if (!orderid.getItems().contains(orderIdStr)) {
+                    orderid.getItems().add(orderIdStr);
+                }
+
+                orderid.getSelectionModel().select(orderIdStr);
 
                 System.out.println("New order id successfull added with id"+ORDERID);
                 ShowMyMsg("Success","Added Successfully");
@@ -244,8 +268,8 @@ void DoSave(ActionEvent event) {
 
             stmt.setInt(5,Integer.parseInt(qty.getEditor().getText()));
 
-            stmt.setInt(6,Integer.parseInt(bill.getText()));
-            stmt.setInt(7,Integer.parseInt(ppu.getText()));
+            stmt.setInt(6,Integer.parseInt(ppu.getText()));
+            stmt.setInt(7,Integer.parseInt(bill.getText()));
             stmt.setString(8,measurement.getText());
             stmt.setString(9,workers.getEditor().getText());
             stmt.setString(10,status.getValue());
@@ -264,24 +288,25 @@ void DoSave(ActionEvent event) {
         FileChooser chooser = new FileChooser();
 
         chooser.setTitle("Select profile pic");
-        chooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("All Images", "*.*"), new FileChooser.ExtensionFilter("JPG", "*.jpg"), new FileChooser.ExtensionFilter("PNG", "*.png"), new FileChooser.ExtensionFilter("*.*", "*.*"));
+        chooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("All Images", "*.*")
+                , new FileChooser.ExtensionFilter("JPG", "*.jpg")
+                , new FileChooser.ExtensionFilter("PNG", "*.png")
+                , new FileChooser.ExtensionFilter("*.*", "*.*"));
 
-        File file=chooser.showOpenDialog(null);
+        File file = chooser.showOpenDialog(null);
 
         if (file != null) {
-            String absolutePath = file.getAbsolutePath();
-        }
+            filepath = file.getAbsolutePath();//newly added
+//            String absolutePath = file.getAbsolutePath();//newly remove;
 
 //        filepath=file.getAbsolutePath();
-
-
-        try {
-            imgPrev.setImage(new Image(new FileInputStream(file)));
-        }
-
-        catch (FileNotFoundException e)
-        {
-            e.printStackTrace();
+            try {
+                imgPrev.setImage(new Image(new FileInputStream(file)));
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+        }else{
+            System.out.println("File selection cancelled.");
         }
     }
 
@@ -331,6 +356,27 @@ void DoSave(ActionEvent event) {
         }
     }
 
+    @FXML
+    void DofillOrderIds(ActionEvent event) {
+        fillOrderIds(); // call the helper without event
+    }
+
+    void fillOrderIds() {
+        try {
+            stmt = con.prepareStatement("SELECT Orderid FROM measurements");
+            ResultSet rs = stmt.executeQuery();
+            orderid.getItems().clear();
+            while (rs.next()) {
+                String id = rs.getString("Orderid");
+                if (!orderid.getItems().contains(id)) {
+                    orderid.getItems().add(id);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     void ShowMyMsg (String title, String msg){
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
 
@@ -343,6 +389,15 @@ void DoSave(ActionEvent event) {
     @FXML
     void initialize() {
 
+        //connection check
+        con = MySqlConnectionKlass.doConnect();
+        if (con == null) {
+            System.out.println("Connection not established");
+        } else {
+            System.out.println("Connection established");
+        }
+
+        fillOrderIds();
         //status combobox fill
         status.getItems().addAll("1","2","3");
 
@@ -363,16 +418,8 @@ void DoSave(ActionEvent event) {
             qty.getItems().add(String.valueOf(ary[i]));
         }
 
-
         qty.getSelectionModel().selectPrevious();
 
-        //connection check
-        con = MySqlConnectionKlass.doConnect();
-        if (con == null) {
-            System.out.println("Connection not established");
-        } else {
-            System.out.println("Connection established");
-        }
-
+        doorder.setValue(LocalDate.now());//to set the date of order to current date
     }
 }

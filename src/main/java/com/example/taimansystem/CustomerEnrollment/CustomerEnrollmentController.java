@@ -1,5 +1,3 @@
-//hot to assign datepicker the current date;
-//How to update the primary key i.e. mobile number
 package com.example.taimansystem.CustomerEnrollment;
 
 import java.net.URL;

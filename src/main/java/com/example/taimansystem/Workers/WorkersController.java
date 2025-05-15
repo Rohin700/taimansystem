@@ -71,10 +71,15 @@ public class WorkersController {
 
             int count=stmt.executeUpdate();
 
-            if(count==1)
+            if(count==1){
                 System.out.println("Record deleted successfully");
-            else
-                System.out.println("Record not found INVALID EMAIL");
+                ShowAlert("Success","Record deleted successfully");
+                }
+
+            else {
+                System.out.println("Record not found invalid workername");
+                ShowAlert("Sorry","Record not Found invalid workername");
+            }
         }
         catch (Exception e)
         {

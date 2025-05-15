@@ -1,4 +1,3 @@
-//new generate nahi hongii chahia columns
 package com.example.taimansystem.WorkersTableView;
 
 import java.net.URL;
@@ -39,27 +38,29 @@ public class WorkersTableViewController {
 
     @FXML
     void doShowAll(ActionEvent event) {
+        if (tblview.getColumns().isEmpty()) {
 
-        TableColumn<Workersbean, String> wnameC=new TableColumn<Workersbean,String>("Workers Name");
-        wnameC.setCellValueFactory(new PropertyValueFactory<>("workersname"));
-        wnameC.setMinWidth(100);
+            TableColumn<Workersbean, String> wnameC = new TableColumn<Workersbean, String>("Workers Name");
+            wnameC.setCellValueFactory(new PropertyValueFactory<>("workersname"));
+            wnameC.setMinWidth(100);
 
-        //wnameC,addC,mnoC are the properties that are needed to be shown in the table;
+            //wnameC,addC,mnoC are the properties that are needed to be shown in the table;
 
-        TableColumn<Workersbean, String> addC=new TableColumn<Workersbean,String>("Address");
-        addC.setCellValueFactory(new PropertyValueFactory<>("address"));
-        addC.setMinWidth(100);
+            TableColumn<Workersbean, String> addC = new TableColumn<Workersbean, String>("Address");
+            addC.setCellValueFactory(new PropertyValueFactory<>("address"));
+            addC.setMinWidth(100);
 
-        TableColumn<Workersbean, String> mnoC=new TableColumn<Workersbean,String>("Mobile Number");
-        mnoC.setCellValueFactory(new PropertyValueFactory<>("mobileno"));
-        mnoC.setMinWidth(100);
+            TableColumn<Workersbean, String> mnoC = new TableColumn<Workersbean, String>("Mobile Number");
+            mnoC.setCellValueFactory(new PropertyValueFactory<>("mobileno"));
+            mnoC.setMinWidth(100);
 
 
-        TableColumn<Workersbean, String> splzC=new TableColumn<Workersbean,String>("Specialization");
-        splzC.setCellValueFactory(new PropertyValueFactory<>("specializations"));
-        splzC.setMinWidth(100);
+            TableColumn<Workersbean, String> splzC = new TableColumn<Workersbean, String>("Specialization");
+            splzC.setCellValueFactory(new PropertyValueFactory<>("specializations"));
+            splzC.setMinWidth(100);
 
-        tblview.getColumns().addAll(wnameC,addC,mnoC,splzC);
+            tblview.getColumns().addAll(wnameC, addC, mnoC, splzC);
+        }
         tblview.setItems(getRecords());//This line will help tp fetch record into the tableView
     }
 

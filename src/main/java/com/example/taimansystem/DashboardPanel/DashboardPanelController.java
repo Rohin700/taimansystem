@@ -23,6 +23,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.chart.PieChart;
 import javafx.scene.control.Button;
+import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -55,7 +56,7 @@ public class DashboardPanelController {
     private Button exphb;
 
     @FXML
-    private TextField login;
+    private PasswordField login;
 
     @FXML
     private Button msmnt;
@@ -83,43 +84,60 @@ public class DashboardPanelController {
 
     @FXML
     void doClickOnSite(MouseEvent event) {
-        try{
-            Desktop.getDesktop().browse(new URI("http://www.realJavaOnline.com"));
-        }
-        catch (Exception e){
-            e.printStackTrace();
-        }
+        new Thread(() -> {// because if i will directly call the desktop with the same thread
+            // it may freeze the application
+            try {
+                if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+                    Desktop.getDesktop().browse(new URI("http://www.realJavaOnline.com"));
+                    //Desktop.getDesktop().browse(new URI("http://www.realJavaOnline.com"));
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }).start();//This approach ensures that the desktop operation runs on a separate thread, keeping the JavaFX UI responsive.
     }
 
     @FXML
     void doLogin(ActionEvent event) {
         try {
+            String enteredpass=login.getText();
+            String pass = "rohinGARG";
 
-            String query = "SELECT password FROM login";
-            stmt = con.prepareStatement(query);
+            stmt = con.prepareStatement("select * from login where password=?");
+            stmt.setString(1, pass);
             ResultSet records = stmt.executeQuery();
 
-            if (records.next()) {
-                String storedPassword = records.getString("password");
-                String enteredPassword = login.getText();
-                login.setVisible(false);
-
-
-                if (enteredPassword.equals(storedPassword)) {
-                    csenmt.setDisable(false);
-                    delcnsl.setDisable(false);
-                    exphb.setDisable(false);
-                    msmnt.setDisable(false);
-                    rdyprd.setDisable(false);
-                    tvwrkr.setDisable(false);
-                    wrkr.setDisable(false);
+            if (!records.next()) {
+                stmt = con.prepareStatement("INSERT INTO login (password) VALUES (?)");
+                stmt.setString(1, pass);
+                stmt.executeUpdate();
+                System.out.println("Password inserted successfully.");
+            } else {
+                    System.out.println("Password already exists. Skipping insertion.");
                 }
+
+            stmt = con.prepareStatement("SELECT password FROM login WHERE password = ?");
+            stmt.setString(1, enteredpass);
+            ResultSet loginCheck = stmt.executeQuery();
+
+            if (loginCheck.next()) {
+                csenmt.setDisable(false);
+                delcnsl.setDisable(false);
+                exphb.setDisable(false);
+                msmnt.setDisable(false);
+                rdyprd.setDisable(false);
+                tvwrkr.setDisable(false);
+                wrkr.setDisable(false);
+
+                System.out.println("Login successful");
             }
-        }
-        catch(Exception e){
-                e.printStackTrace();
+            else{
+                System.out.println("Incorrect Password");
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+    }
 
 @FXML
     void DoCallExploreHub(ActionEvent event) throws IOException {
